@@ -24,10 +24,8 @@ const conversationStarters = [
 app.use(cors());
 app.use(express.json());
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '.')));
-}
+// Serve static files
+app.use(express.static(path.join(__dirname, '.')));
 
 // Get conversation starters
 app.get('/api/starters', (req, res) => {
@@ -156,16 +154,19 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-// Serve index.html for all other routes in production
-if (process.env.NODE_ENV === 'production') {
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, 'index.html'));
+// Serve index.html for all other routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Start server
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(port, () => {
+        console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`);
+        console.log('OpenAI API Key:', process.env.OPENAI_API_KEY ? 'Present' : 'Missing');
+        console.log('OpenWeather API Key:', process.env.OPENWEATHER_API_KEY ? 'Present' : 'Missing');
     });
 }
 
-// Start server
-app.listen(port, () => {
-    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${port}`);
-    console.log('OpenAI API Key:', process.env.OPENAI_API_KEY ? 'Present' : 'Missing');
-    console.log('OpenWeather API Key:', process.env.OPENWEATHER_API_KEY ? 'Present' : 'Missing');
-}); 
+// Export the Express API for Vercel
+module.exports = app; 
