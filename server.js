@@ -29,6 +29,8 @@ app.use(express.static(path.join(__dirname, '.')));
 
 // Get conversation starters
 app.get('/api/starters', (req, res) => {
+    console.log('GET /api/starters called');
+    console.log('Sending starters:', conversationStarters);
     res.json({ starters: conversationStarters });
 });
 
@@ -61,7 +63,7 @@ async function getCoordinates(cityName) {
 // Chat endpoint
 app.post('/api/chat', async (req, res) => {
     try {
-        console.log('Received chat request:', req.body);
+        console.log('POST /api/chat called with body:', req.body);
         const { message } = req.body;
 
         if (!message) {
@@ -71,6 +73,7 @@ app.post('/api/chat', async (req, res) => {
 
         // Check if user wants to see conversation starters
         if (message.toLowerCase() === 'home') {
+            console.log('Home requested, sending starters');
             return res.json({ 
                 response: "Welcome back! Here are some conversation starters:",
                 starters: conversationStarters
@@ -135,6 +138,13 @@ app.post('/api/chat', async (req, res) => {
         });
 
         console.log('OpenAI API response received:', completion.choices[0].message);
+        console.log('Sending response with:', {
+            response: completion.choices[0].message.content,
+            hasCoordinates: !!coordinates,
+            hasWeather: !!weatherData,
+            starters: conversationStarters
+        });
+        
         res.json({ 
             response: completion.choices[0].message.content,
             coordinates: coordinates,

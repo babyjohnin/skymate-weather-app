@@ -20,6 +20,12 @@ function addMessage(content, isUser = false) {
 
 // Show conversation starters
 function showStarters(starters) {
+    console.log('Showing starters:', starters);
+    if (!starters || !Array.isArray(starters)) {
+        console.error('Invalid starters data:', starters);
+        return;
+    }
+    
     startersContainer.innerHTML = '';
     starters.forEach(starter => {
         const button = document.createElement('button');
@@ -54,8 +60,11 @@ async function goToHome() {
 // Load conversation starters
 async function loadStarters() {
     try {
+        console.log('Loading starters from:', `${API_BASE_URL}/api/starters`);
         const response = await fetch(`${API_BASE_URL}/api/starters`);
+        console.log('Starters response status:', response.status);
         const data = await response.json();
+        console.log('Starters data received:', data);
         showStarters(data.starters);
     } catch (error) {
         console.error('Error loading starters:', error);
@@ -82,7 +91,6 @@ async function handleUserInput() {
 
     try {
         console.log('Sending request to server...');
-        // Send message to our server
         const response = await fetch(`${API_BASE_URL}/api/chat`, {
             method: 'POST',
             headers: {
@@ -116,6 +124,7 @@ async function handleUserInput() {
         }
 
         // Always show conversation starters after each response
+        console.log('Showing starters from response:', data.starters);
         showStarters(data.starters);
     } catch (error) {
         console.error('Detailed error:', error);
