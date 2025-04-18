@@ -103,32 +103,20 @@ async function handleUserInput() {
         loadingMessage.remove();
         addMessage(data.response, false);
 
-        // If we have coordinates, fetch and display weather
-        if (data.coordinates) {
-            const weatherMessage = addMessage("Fetching weather data...", false);
-            try {
-                const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${data.coordinates.lat}&lon=${data.coordinates.lon}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric`);
-                const weatherData = await weatherResponse.json();
-                
-                weatherMessage.remove();
-                const weatherInfo = `
-                    Current weather in ${data.coordinates.name}, ${data.coordinates.country}:
-                    Temperature: ${weatherData.main.temp}°C
-                    Feels like: ${weatherData.main.feels_like}°C
-                    Weather: ${weatherData.weather[0].description}
-                    Wind: ${weatherData.wind.speed} m/s
-                `;
-                addMessage(weatherInfo, false);
-            } catch (error) {
-                weatherMessage.remove();
-                addMessage("Sorry, I couldn't fetch the weather data right now.", false);
-            }
+        // If we have weather data, display it
+        if (data.weather) {
+            const weatherInfo = `
+                Current weather in ${data.coordinates.name}, ${data.coordinates.country}:
+                Temperature: ${data.weather.main.temp}°C
+                Feels like: ${data.weather.main.feels_like}°C
+                Weather: ${data.weather.weather[0].description}
+                Wind: ${data.weather.wind.speed} m/s
+            `;
+            addMessage(weatherInfo, false);
         }
 
-        // If the response includes starters, show them
-        if (data.starters) {
-            showStarters(data.starters);
-        }
+        // Always show conversation starters after each response
+        showStarters(data.starters);
     } catch (error) {
         console.error('Detailed error:', error);
         loadingMessage.remove();

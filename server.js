@@ -98,9 +98,25 @@ app.post('/api/chat', async (req, res) => {
 
         const extractedCity = cityExtraction.choices[0].message.content.trim();
         let coordinates = null;
+        let weatherData = null;
 
         if (extractedCity !== 'NO_CITY') {
             coordinates = await getCoordinates(extractedCity);
+            if (coordinates) {
+                try {
+                    const weatherResponse = await axios.get(`https://api.openweathermap.org/data/2.5/weather`, {
+                        params: {
+                            lat: coordinates.lat,
+                            lon: coordinates.lon,
+                            appid: process.env.OPENWEATHER_API_KEY,
+                            units: 'metric'
+                        }
+                    });
+                    weatherData = weatherResponse.data;
+                } catch (error) {
+                    console.error('Weather API error:', error);
+                }
+            }
         }
 
         console.log('Making OpenAI API request...');
@@ -124,6 +140,7 @@ app.post('/api/chat', async (req, res) => {
         res.json({ 
             response: completion.choices[0].message.content,
             coordinates: coordinates,
+            weather: weatherData,
             starters: conversationStarters
         });
     } catch (error) {
