@@ -123,7 +123,8 @@ app.post('/api/chat', async (req, res) => {
         console.log('OpenAI API response received:', completion.choices[0].message);
         res.json({ 
             response: completion.choices[0].message.content,
-            coordinates: coordinates
+            coordinates: coordinates,
+            starters: conversationStarters
         });
     } catch (error) {
         console.error('Detailed error:', {
