@@ -63,11 +63,27 @@ async function loadStarters() {
         console.log('Loading starters from:', `${API_BASE_URL}/api/starters`);
         const response = await fetch(`${API_BASE_URL}/api/starters`);
         console.log('Starters response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Response was not JSON');
+        }
+        
         const data = await response.json();
         console.log('Starters data received:', data);
+        
+        if (!data || !data.starters) {
+            throw new Error('Invalid response format: missing starters');
+        }
+        
         showStarters(data.starters);
     } catch (error) {
         console.error('Error loading starters:', error);
+        addMessage(`Error loading conversation starters: ${error.message}`, false);
     }
 }
 
@@ -100,12 +116,18 @@ async function handleUserInput() {
         });
 
         console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Response was not JSON');
+        }
+        
         const data = await response.json();
         console.log('Response data:', data);
-
-        if (!response.ok) {
-            throw new Error(data.error || data.details || 'Network response was not ok');
-        }
 
         // Remove loading message and add actual response
         loadingMessage.remove();
@@ -124,12 +146,14 @@ async function handleUserInput() {
         }
 
         // Always show conversation starters after each response
-        console.log('Showing starters from response:', data.starters);
-        showStarters(data.starters);
+        if (data.starters) {
+            console.log('Showing starters from response:', data.starters);
+            showStarters(data.starters);
+        }
     } catch (error) {
         console.error('Detailed error:', error);
         loadingMessage.remove();
-        addMessage(`Error: ${error.message}. Please check the console for more details and ensure the server is running.`, false);
+        addMessage(`Error: ${error.message}. Please check the console for more details.`, false);
     } finally {
         // Re-enable input and button
         userInput.disabled = false;

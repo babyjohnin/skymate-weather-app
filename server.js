@@ -24,9 +24,7 @@ const conversationStarters = [
 app.use(cors());
 app.use(express.json());
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '.')));
-
+// API Routes
 // Get conversation starters
 app.get('/api/starters', (req, res) => {
     console.log('GET /api/starters called');
@@ -163,6 +161,9 @@ app.post('/api/chat', async (req, res) => {
         });
     }
 });
+
+// Serve static files - moved after API routes
+app.use(express.static(path.join(__dirname, '.')));
 
 // Serve index.html for all other routes
 app.get('*', (req, res) => {
