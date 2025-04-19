@@ -27,9 +27,14 @@ app.use(express.json());
 // API Routes
 // Get conversation starters
 app.get('/api/starters', (req, res) => {
-    console.log('GET /api/starters called');
-    console.log('Sending starters:', conversationStarters);
-    res.json({ starters: conversationStarters });
+    try {
+        console.log('GET /api/starters called');
+        console.log('Sending starters:', conversationStarters);
+        res.json({ starters: conversationStarters });
+    } catch (error) {
+        console.error('Error in /api/starters:', error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
 });
 
 // Geocoding function
