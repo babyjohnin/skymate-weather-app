@@ -8,6 +8,13 @@ const homeButton = document.getElementById('home-button');
 // API Configuration
 const API_BASE_URL = window.location.origin;
 
+// Conversation starters
+const defaultStarters = [
+    "What's the weather like today?",
+    "Is it going to rain tomorrow?",
+    "How's the weather in New York?"
+];
+
 // Add message to chat
 function addMessage(content, isUser = false) {
     const messageDiv = document.createElement('div');
@@ -19,13 +26,7 @@ function addMessage(content, isUser = false) {
 }
 
 // Show conversation starters
-function showStarters(starters) {
-    console.log('Showing starters:', starters);
-    if (!starters || !Array.isArray(starters)) {
-        console.error('Invalid starters data:', starters);
-        return;
-    }
-    
+function showStarters(starters = defaultStarters) {
     startersContainer.innerHTML = '';
     starters.forEach(starter => {
         const button = document.createElement('button');
@@ -106,7 +107,6 @@ async function handleUserInput() {
     const loadingMessage = addMessage("SkyMate is thinking...", false);
 
     try {
-        console.log('Sending request to server...');
         const response = await fetch(`${API_BASE_URL}/api/chat`, {
             method: 'POST',
             headers: {
@@ -115,45 +115,23 @@ async function handleUserInput() {
             body: JSON.stringify({ message })
         });
 
-        console.log('Response status:', response.status);
-        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            throw new Error('Response was not JSON');
-        }
-        
-        const data = await response.json();
-        console.log('Response data:', data);
 
+        const data = await response.json();
+        
         // Remove loading message and add actual response
         loadingMessage.remove();
         addMessage(data.response, false);
 
-        // If we have weather data, display it
-        if (data.weather) {
-            const weatherInfo = `
-                Current weather in ${data.coordinates.name}, ${data.coordinates.country}:
-                Temperature: ${data.weather.main.temp}°C
-                Feels like: ${data.weather.main.feels_like}°C
-                Weather: ${data.weather.weather[0].description}
-                Wind: ${data.weather.wind.speed} m/s
-            `;
-            addMessage(weatherInfo, false);
-        }
-
-        // Always show conversation starters after each response
-        if (data.starters) {
-            console.log('Showing starters from response:', data.starters);
-            showStarters(data.starters);
-        }
+        // Show conversation starters
+        showStarters(data.starters || defaultStarters);
     } catch (error) {
-        console.error('Detailed error:', error);
+        console.error('Error:', error);
         loadingMessage.remove();
-        addMessage(`Error: ${error.message}. Please check the console for more details.`, false);
+        addMessage("Sorry, I'm having trouble connecting. Please try again later.", false);
+        showStarters();
     } finally {
         // Re-enable input and button
         userInput.disabled = false;
@@ -173,4 +151,5 @@ userInput.addEventListener('keypress', (e) => {
 homeButton.addEventListener('click', goToHome);
 
 // Initial setup
-goToHome(); 
+showStarters();
+addMessage("Hi! I'm SkyMate, your weather assistant. How can I help you today? 🌤️", false); 
