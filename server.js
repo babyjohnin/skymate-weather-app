@@ -65,8 +65,8 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '.')));
+// Serve static files from the root directory
+app.use(express.static(__dirname));
 
 // Serve index.html for all other routes
 app.get('*', (req, res) => {
