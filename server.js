@@ -65,12 +65,23 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-// Serve static files from the root directory
+// Serve static files
 app.use(express.static(__dirname));
 
-// Serve index.html for all other routes
-app.get('*', (req, res) => {
+// Serve the main application
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Handle all other routes
+app.get('*', (req, res) => {
+    // If the request is for a file that exists, serve it
+    if (req.path.endsWith('.html') || req.path.endsWith('.css') || req.path.endsWith('.js')) {
+        res.sendFile(path.join(__dirname, req.path));
+    } else {
+        // Otherwise, serve the main application
+        res.sendFile(path.join(__dirname, 'index.html'));
+    }
 });
 
 // Export the Express API for Vercel
